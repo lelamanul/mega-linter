@@ -89,6 +89,11 @@
     "image": "https://eslint.org/assets/img/favicon.512x512.png",
     "title": "ESLint - Pluggable JavaScript linter"
   },
+  "eslint-plugin-jsonc": {
+    "description": "ESLint plugin for JSON, JSONC and JSON5 files",
+    "image": null,
+    "title": "Introduction | eslint-plugin-jsonc"
+  },
   "flake8": {
     "description": "To install Flake8, open an interactive shell and run:",
     "image": null,
@@ -164,6 +169,16 @@
     "image": "https://avatars2.githubusercontent.com/u/216720?s=400&v=4",
     "title": "tcort/markdown-link-check"
   },
+  "markdown-table-formatter": {
+    "description": "Format markdown tables in files",
+    "image": "https://static.npmjs.com/338e4905a2684ca96e08c7780fc68412.png",
+    "title": "markdown-table-formatter"
+  },
+  "markdown-table-prettify": {
+    "description": "Transforms markdown tables to be more readable.",
+    "image": "https://static.npmjs.com/338e4905a2684ca96e08c7780fc68412.png",
+    "title": "markdown-table-prettify"
+  },
   "markdownlint": {
     "description": "A Node.js style checker and lint tool for Markdown/CommonMark files. - DavidAnson/markdownlint",
     "image": "https://avatars2.githubusercontent.com/u/1828270?s=400&v=4",
@@ -204,6 +219,11 @@
     "image": "https://repository-images.githubusercontent.com/33149177/18c68000-a5b0-11e9-9d88-c03ff0e21635",
     "title": "PowerShell/PSScriptAnalyzer"
   },
+  "prettier": {
+    "description": "Opinionated Code Formatter",
+    "image": "https://prettier.io/icon.png",
+    "title": "Prettier \u00b7 Opinionated Code Formatter"
+  },
   "protolint": {
     "description": "A pluggable linter and fixer to enforce Protocol Buffer style and conventions.  - yoheimuta/protolint",
     "image": "https://avatars1.githubusercontent.com/u/1223268?s=400&v=4",
@@ -228,6 +248,11 @@
     "description": "Home page for Raku, the newest member of the family of languages known as Perl.",
     "image": null,
     "title": "Raku Programming Language"
+  },
+  "remark-lint": {
+    "description": "Markdown processor powered by plugins",
+    "image": "https://raw.githubusercontent.com/remarkjs/remark/website/screenshot.png",
+    "title": "remark"
   },
   "rst-lint": {
     "description": "reStructuredText linter. Contribute to twolfson/restructuredtext-lint development by creating an account on GitHub.",
@@ -303,6 +328,11 @@
     "description": "# stylelint",
     "image": null,
     "title": "A mighty, modern style linter \u00b7 stylelint"
+  },
+  "swiftlint": {
+    "description": "A tool to enforce Swift style and conventions. Contribute to realm/SwiftLint development by creating an account on GitHub.",
+    "image": "https://avatars3.githubusercontent.com/u/7575099?s=400&v=4",
+    "title": "realm/SwiftLint"
   },
   "tekton-lint": {
     "description": "Linter for Tekton definitions. Contribute to IBM/tekton-lint development by creating an account on GitHub.",

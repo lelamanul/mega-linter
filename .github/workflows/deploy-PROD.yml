@@ -66,7 +66,7 @@ jobs:
           node-version: "12.x"
           registry-url: "https://registry.npmjs.org"
       - run: cd mega-linter-runner && npm install
-      - run: cd mega-linter-runner && npm version prerelease --preid=${{github.sha}}
+      - run: cd mega-linter-runner && npm version prerelease --preid=$(date '+%d-%m-%Y_%H-%M')
       - run: cd mega-linter-runner && npm publish --tag beta || echo "mega-linter-runner beta not published"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -109,5 +109,5 @@ jobs:
         run: |
           export CI_ENV="$(bash <(curl -s https://codecov.io/env)) -e GITHUB_ACTIONS"
           echo "CI_ENV=${CI_ENV}"
-          docker run $CI_ENV -e TEST_CASE_RUN=true -e OUTPUT_FORMAT=text -e OUTPUT_FOLDER=${GITHUB_SHA} -e OUTPUT_DETAILS=detailed -e GITHUB_SHA=${GITHUB_SHA} -e PAT="${{secrets.PAT}}" -v ${GITHUB_WORKSPACE}:/tmp/lint nvuillam/mega-linter:latest
+          docker run $CI_ENV -e TEST_CASE_RUN=true -e OUTPUT_FORMAT=text -e OUTPUT_FOLDER=${GITHUB_SHA} -e OUTPUT_DETAILS=detailed -e GITHUB_SHA=${GITHUB_SHA} -e PAT="${{secrets.PAT}}" -v "/var/run/docker.sock:/var/run/docker.sock:rw" -v ${GITHUB_WORKSPACE}:/tmp/lint nvuillam/mega-linter:latest
         timeout-minutes: 30

@@ -20,6 +20,7 @@
         "rust",
         "salesforce",
         "scala",
+        "swift",
         "terraform"
       ],
       "type": "string"
@@ -29,14 +30,18 @@
   "properties": {
     "active_only_if_file_found": {
       "$id": "#/properties/active_only_if_file_found",
-      "description": "Name of the config file to be found, else descriptor will be deactivated",
+      "description": "Names of the config files to be found (at least one), else descriptor will be deactivated",
       "examples": [
         [
-          ".editorconfig"
+          ".editorconfig",
+          ".eslintrc.json"
         ]
       ],
-      "title": "Active if file name found",
-      "type": "string"
+      "items": {
+        "type": "string"
+      },
+      "title": "Active if one of file names found",
+      "type": "array"
     },
     "descriptor_flavors": {
       "$id": "#/properties/descriptor_flavors",
@@ -358,6 +363,41 @@
           }
         ],
         "properties": {
+          "activation_rules": {
+            "$id": "#/properties/linters/items/properties/activation_rules",
+            "default": [],
+            "description": "List of rules to check to activate linter",
+            "examples": [
+              [
+                {
+                  "default_value": "standard",
+                  "expected_value": "prettier",
+                  "type": "variable",
+                  "variable": "JAVASCRIPT_DEFAULT_STYLE"
+                }
+              ]
+            ],
+            "items": {
+              "type": "object"
+            },
+            "title": "Activation rules",
+            "type": "array"
+          },
+          "active_only_if_file_found": {
+            "$id": "#/properties/linters/items/properties/active_only_if_file_found",
+            "description": "Names of the config files to be found (at least one), else descriptor will be deactivated",
+            "examples": [
+              [
+                ".editorconfig",
+                ".eslintrc.json"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Active if one of file names found",
+            "type": "array"
+          },
           "class": {
             "$id": "#/properties/linters/items/properties/class",
             "description": "If Mega-Linter core is not enough, use a custom class inheriting from Linter class",
@@ -389,6 +429,42 @@
             },
             "title": "Additional CLI arguments when config file is used",
             "type": "array"
+          },
+          "cli_docker_args": {
+            "$id": "#/properties/linters/items/properties/cli_docker_args",
+            "default": [],
+            "description": "Arguments for docker run before image name",
+            "examples": [
+              [
+                "-v",
+                "`pwd`:`pwd`",
+                "-w",
+                "`pwd`"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "CLI docker run arguments",
+            "type": "array"
+          },
+          "cli_docker_image": {
+            "$id": "#/properties/linters/items/properties/cli_docker_image",
+            "examples": [
+              "norionomura/swiftlint"
+            ],
+            "title": "Name of the docker image to use for linting",
+            "type": "string"
+          },
+          "cli_docker_image_version": {
+            "$id": "#/properties/linters/items/properties/cli_docker_image_version",
+            "default": "latest",
+            "description": "Version of the docker image to use for linting",
+            "examples": [
+              "0.42.0_swift-5.3.2"
+            ],
+            "title": "Docker image version",
+            "type": "string"
           },
           "cli_executable": {
             "$id": "#/properties/linters/items/properties/cli_executable",
@@ -716,6 +792,13 @@
             "title": "Installation requirements",
             "type": "object"
           },
+          "is_formatter": {
+            "$id": "#/properties/linters/items/properties/is_formatter",
+            "default": false,
+            "description": "If the linter is just a formatter, set to true so errors will count as warnings",
+            "title": "Is formatter",
+            "type": "boolean"
+          },
           "lint_all_files": {
             "$id": "#/properties/linters/items/lint_all_files",
             "default": false,
@@ -731,6 +814,12 @@
             ],
             "format": "uri",
             "title": "Linter banner image URL",
+            "type": "string"
+          },
+          "linter_help_cache": {
+            "$id": "#/properties/linters/items/properties/linter_help_cache",
+            "description": "If the linter is unable to return help content, hardcode it here",
+            "title": "Hardcoded help content",
             "type": "string"
           },
           "linter_image_url": {
@@ -830,6 +919,17 @@
             ],
             "title": "Test folder in .automation/",
             "type": "string"
+          },
+          "test_variables": {
+            "$id": "#/properties/linters/items/properties/test_variables",
+            "description": "List of variables to set before running tests",
+            "examples": [
+              {
+                "JAVASCRIPT_DEFAULT_STYLE": "prettier"
+              }
+            ],
+            "title": "Test variables",
+            "type": "object"
           },
           "variables": {
             "$id": "#/properties/linters/items/properties/variables",

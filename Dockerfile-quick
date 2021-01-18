@@ -14,8 +14,9 @@ FROM $MEGALINTER_BASE_IMAGE
 # Installs python dependencies #
 ################################
 COPY megalinter /megalinter
-RUN python /megalinter/setup.py install
-
+RUN python /megalinter/setup.py install \
+    && python /megalinter/setup.py clean --all \
+    && rm -rf /var/cache/apk/*
 #######################################
 # Copy scripts and rules to container #
 #######################################
@@ -32,9 +33,9 @@ ARG BUILD_VERSION
 #################################################
 # Set ENV values used for debugging the version #
 #################################################
-ENV BUILD_DATE=$BUILD_DATE
-ENV BUILD_REVISION=$BUILD_REVISION
-ENV BUILD_VERSION=$BUILD_VERSION
+ENV BUILD_DATE=$BUILD_DATE \
+    BUILD_REVISION=$BUILD_REVISION \
+    BUILD_VERSION=$BUILD_VERSION
 
 ENV MEGALINTER_FLAVOR=all
 

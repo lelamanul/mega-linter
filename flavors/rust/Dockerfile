@@ -1,4 +1,4 @@
-# MEGA-LINTER FLAVOR [rust]: Mega-Linter optimized for RUST based projects
+# MEGA-LINTER FLAVOR [rust]: Optimized for RUST based projects
 ###########################################
 ###########################################
 ## Dockerfile to run Mega-Linter ##
@@ -87,15 +87,21 @@ RUN npm install --no-cache --ignore-scripts \
                 jscpd \
                 stylelint \
                 stylelint-config-standard \
+                stylelint-config-sass-guidelines \
+                stylelint-scss \
                 dockerfilelint \
                 editorconfig-checker \
                 graphql-schema-linter \
                 npm-groovy-lint \
                 htmlhint \
                 jsonlint \
+                eslint eslint-plugin-jsonc \
                 v8r \
                 markdownlint-cli \
+                remark-cli \
+                remark-preset-lint-recommended \
                 markdown-link-check \
+                markdown-table-formatter \
                 @stoplight/spectral@5.6.0 \
                 cspell@4.1.3 \
                 sql-lint \
@@ -185,7 +191,9 @@ ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
 # Installs python dependencies #
 ################################
 COPY megalinter /megalinter
-RUN python /megalinter/setup.py install
+RUN python /megalinter/setup.py install \
+    && python /megalinter/setup.py clean --all \
+    && rm -rf /var/cache/apk/*
 
 #######################################
 # Copy scripts and rules to container #
@@ -203,9 +211,9 @@ ARG BUILD_VERSION
 #################################################
 # Set ENV values used for debugging the version #
 #################################################
-ENV BUILD_DATE=$BUILD_DATE
-ENV BUILD_REVISION=$BUILD_REVISION
-ENV BUILD_VERSION=$BUILD_VERSION
+ENV BUILD_DATE=$BUILD_DATE \
+    BUILD_REVISION=$BUILD_REVISION \
+    BUILD_VERSION=$BUILD_VERSION
 
 #FLAVOR__START
 ENV MEGALINTER_FLAVOR=rust

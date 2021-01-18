@@ -2,11 +2,112 @@
 
 ## [insiders] (master)
 
-Note: Can be used using `nvuillam/mega-linter@insiders` in your GitHub Action mega-linter.yml file, or with `nvuillam/mega-linter@latest` docker image
+Note: Can be used with `nvuillam/mega-linter@insiders` in your GitHub Action mega-linter.yml file, or with `nvuillam/mega-linter@latest` docker image
+
+- Core architecture
+  - Add docker-in-docker management (reuse running docker instance)
+  
+- Linters
+  - Add [SwiftLint](https://github.com/realm/SwiftLint) for Swift language
+  - New Mega-Linter flavor **swift**
+
+- mega-linter-runner --install
+  - Create .jscpd.json file if copy-paste detection is activated
+  - Display ending message
+
+- Linter versions upgrades
+  - [powershell](https://github.com/PowerShell/PSScriptAnalyzer) from 7.1.0 to **7.1.1** on 2021-01-15
+  - [eslint](https://eslint.org) from 7.17.0 to **7.18.0** on 2021-01-16
+  - [eslint-plugin-jsonc](https://ota-meshi.github.io/eslint-plugin-jsonc/) from 7.17.0 to **7.18.0** on 2021-01-16
+  - [scalafix](https://scalacenter.github.io/scalafix/) from 0.9.24 to **0.9.25** on 2021-01-16
+  - [snakemake](https://snakemake.readthedocs.io/en/stable/) from 5.31.1 to **5.32.0** on 2021-01-16
+  - [protolint](https://github.com/yoheimuta/protolint) from 0.26.1 to **0.27.0** on 2021-01-18
+<!-- linter-versions-end -->
+
+## [4.24.0] 2021-01-14
+
+- Linters
+  - Add [markdown-table-formatter](https://github.com/nvuillam/markdown-table-formatter)
+  - Fix python error when CSpell found no errors
+
+- Linter versions upgrades
+  - [v8r](https://github.com/chris48s/v8r) from 0.4.0 to **0.5.0** on 2021-01-14
+  - [phpstan](https://phpstan.org/) from 0.12.66 to **0.12.67** on 2021-01-14
+  - [psalm](https://psalm.dev) from 4.3.1 to **Psalm.4.x-dev@** on 2021-01-14
+
+## [4.23.3] 2021-01-14
+
+- Fix `.cspell.json` file updater
+
+- Linter versions upgrades
+  - [v8r](https://github.com/chris48s/v8r) from 0.4.0 to **0.5.0** on 2021-01-14
+
+## [4.23.2] 2021-01-14
+
+- mega-linter-runner --install:
+  - Fix `.mega-linter.yml` DISABLE property when nothing in it
+  - Add default `.cspell.json` if spelling mistakes detector is activated
+
+## [4.23.1] 2021-01-12
+
+- Core
+  - Refactor part of Linter & reporters to manage correctly logs when linter cli_lint_mode is `project` or `list_of_files`
+    - Generate ConsoleLinter and Text reports based from Linter.files_lint_results instead of at each loop
+    - When TAP Reporter active, switch linters with cli_lint_mode == "list_of_files" to "files"
+    - Fix linter output when cli_lint_mode == "list_of_files"
+  - Decrease number of Dockerfile steps
+
+## [4.23.0] 2021-01-12
+
+- Core
+  - If the linter is a formatter, errors are not considered as blocking errors by default
+
+- Linters
+  - Add **prettier** to format Javascript and Typescript. **standard** remains default
+  - Add **remark-lint** to check and fix Markdown files. **markdownlint** remains default
+
+- Linter versions upgrades
+  - [golangci-lint](https://golangci-lint.run/) from 1.35.1 to **1.35.2** on 2021-01-11
+    - [golangci-lint](https://golangci-lint.run/) from 1.35.0 to **1.35.1** on 2021-01-11
+    - [golangci-lint](https://golangci-lint.run/) from 1.34.1 to **1.35.0** on 2021-01-08
+  - [cfn-lint](https://github.com/martysweet/cfn-lint) from 0.44.2 to **0.44.3** on 2021-01-09
+  - [tflint](https://github.com/terraform-linters/tflint) from 0.23.0 to **0.23.1** on 2021-01-10
+  - [dotenv-linter](https://dotenv-linter.github.io/) from 2.2.1 to **3.0.0** on 2021-01-11
+    - Update Mega-Linter to call dotenv-linter v3 with `fix` and not `--fix` anymore
+  - [phpstan](https://phpstan.org/) from 0.12.65 to **0.12.66** on 2021-01-11
+
+## [4.22.1] 2021-01-07
+
+- Core
+  - Improve `warning` status in logs
+  - Remove timestamp at each log line
+
+- Enhance integration with GitLab CI
+  - Update configuration generator
+  - Update core to clean logs when in GitLab CI context
+
+## [4.22.0] 2021-01-06
+
+- Core
+  - Allow user to configure custom scripts in `.mega-linter.yml` to run before and after linting, with variables `PRE_RUN` and `POST_RUN`
+  - Fix wrong linter status bug
+  - Enhance configuration variables performances
+  - Rename XXX_FILE_NAME into XXX_CONFIG_FILE
+
+- Linters
+  - Add JSONC (json with comments) linting with eslint-plugin-jsonc
+
+## [4.21.0] 2021-01-03
 
 - Linters
   - Add misspell spell checker
   - Allow to define cli_lint_errors_regex in descriptors to extract number of errors from linter output stdout
+  - Call linters CLIs with list of files instead of once by file, to improve performances
+    - eslint
+    - markdownlint
+    - pylint
+    - flake8
+    - isort
 
 - Core
   - Implement architecture for Mega-Linter plugins

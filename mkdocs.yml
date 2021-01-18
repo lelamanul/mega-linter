@@ -4,7 +4,7 @@ repo_url: https://github.com/nvuillam/mega-linter
 edit_uri: tree/master/docs
 site_author: Nicolas Vuillamy
 # site_description-start
-site_description: Mega-Linter is an 100% Open-Source tool for CI/CD workflows that analyzes consistency and quality of 38 languages, 17 formats, 16 tooling formats , abusive copy-pastes and spelling mistakes in your repository sources, generates various reports, and can even apply formatting and auto-fixes, to ensure all your projects sources are clean, whatever IDE/toolbox are used by their developers.Ready to use out of the box as a GitHub Action or any CI system, highly configurable and free for all uses
+site_description: Mega-Linter is an 100% Open-Source tool for CI/CD workflows that analyzes consistency and quality of 41 languages, 20 formats, 16 tooling formats , abusive copy-pastes and spelling mistakes in your repository sources, generates various reports, and can even apply formatting and auto-fixes, to ensure all your projects sources are clean, whatever IDE/toolbox are used by their developers.Ready to use out of the box as a GitHub Action or any CI system, highly configurable and free for all uses
 # site_description-end
 copyright: Copyright &copy; 2020 <a href="https://github.com/nvuillam">Nicolas Vuillamy</a>
 theme:
@@ -86,6 +86,7 @@ nav:
               - "All JAVASCRIPT linters": "descriptors/javascript.md"
               - "eslint": "descriptors/javascript_eslint.md"
               - "standard": "descriptors/javascript_standard.md"
+              - "prettier": "descriptors/javascript_prettier.md"
           - "JSX":
               - "All JSX linters": "descriptors/jsx.md"
               - "eslint": "descriptors/jsx_eslint.md"
@@ -134,6 +135,9 @@ nav:
           - "SQL":
               - "All SQL linters": "descriptors/sql.md"
               - "sql-lint": "descriptors/sql_sql_lint.md"
+          - "SWIFT":
+              - "All SWIFT linters": "descriptors/swift.md"
+              - "swiftlint": "descriptors/swift_swiftlint.md"
           - "TSX":
               - "All TSX linters": "descriptors/tsx.md"
               - "eslint": "descriptors/tsx_eslint.md"
@@ -141,6 +145,7 @@ nav:
               - "All TYPESCRIPT linters": "descriptors/typescript.md"
               - "eslint": "descriptors/typescript_eslint.md"
               - "standard": "descriptors/typescript_standard.md"
+              - "prettier": "descriptors/typescript_prettier.md"
           - "Visual Basic .NET (VBDOTNET)":
               - "All Visual Basic .NET (VBDOTNET) linters": "descriptors/vbdotnet.md"
               - "dotnet-format": "descriptors/vbdotnet_dotnet_format.md"
@@ -164,6 +169,7 @@ nav:
           - "JSON":
               - "All JSON linters": "descriptors/json.md"
               - "jsonlint": "descriptors/json_jsonlint.md"
+              - "eslint-plugin-jsonc": "descriptors/json_eslint_plugin_jsonc.md"
               - "v8r": "descriptors/json_v8r.md"
           - "LATEX":
               - "All LATEX linters": "descriptors/latex.md"
@@ -171,7 +177,9 @@ nav:
           - "MARKDOWN":
               - "All MARKDOWN linters": "descriptors/markdown.md"
               - "markdownlint": "descriptors/markdown_markdownlint.md"
+              - "remark-lint": "descriptors/markdown_remark_lint.md"
               - "markdown-link-check": "descriptors/markdown_markdown_link_check.md"
+              - "markdown-table-formatter": "descriptors/markdown_markdown_table_formatter.md"
           - "PROTOBUF":
               - "All PROTOBUF linters": "descriptors/protobuf.md"
               - "protolint": "descriptors/protobuf_protolint.md"
@@ -272,13 +280,16 @@ nav:
       - "rust": "flavors/rust.md"
       - "salesforce": "flavors/salesforce.md"
       - "scala": "flavors/scala.md"
+      - "swift": "flavors/swift.md"
       - "terraform": "flavors/terraform.md"
 # flavors-end
-  - "Plugins": "plugins.md"
-  - "Badge": "badge.md"
   - "Run locally": "mega-linter-runner.md"
+  - "Badge": "badge.md"
   - "List of linters": "all_linters.md"
+  - "FAQ": "frequently-asked-questions.md"
+  - "Plugins": "plugins.md"
   - "Special thanks": "special-thanks.md"
   - "Mega-Linter vs Super-Linter": "mega-linter-vs-super-linter.md"
   - "Contribute": "how-to-contribute.md"
+  - "License": "license.md"
   - "Changelog": "CHANGELOG.md"

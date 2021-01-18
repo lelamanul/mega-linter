@@ -14,6 +14,7 @@
 
 ### Global
 
+- [analysis-tools.dev](https://analysis-tools.dev/tool/mega-linter)
 - [awesome-linters](https://github.com/caramelomartins/awesome-linters#language-agnostic)
 - [schemastore.org](https://www.schemastore.org/json/)
 
@@ -23,12 +24,16 @@
 - [checkstyle](https://checkstyle.sourceforge.io/index.html#Related_Tools_Active_Tools)
 - [clj-kondo](https://github.com/borkdude/clj-kondo/blob/master/doc/ci-integration.md#github)
 - [cspell](https://github.com/streetsidesoftware/cspell/tree/master/packages/cspell#mega-linter)
+- [dotenv-linter](https://dotenv-linter.github.io/#/integrations/mega_linter)
+- [editorconfig-checker](https://github.com/editorconfig-checker/editorconfig-checker#mega-linter)
 - [hadolint](https://github.com/hadolint/hadolint/blob/master/docs/INTEGRATION.md#mega-linter)
 - [jscpd](https://github.com/kucherenko/jscpd#who-uses-jscpd)
 - [ktlint](https://github.com/pinterest/ktlint#-with-continuous-integration)
 - [markdown-link-check](https://github.com/tcort/markdown-link-check#run-in-other-tools)
 - [npm-groovy-lint](https://nvuillam.github.io/npm-groovy-lint/#mega-linter)
 - [rst-lint](https://github.com/twolfson/restructuredtext-lint/wiki/Integration-in-other-tools#integration-in-other-tools)
+- [rubocop](https://docs.rubocop.org/rubocop/integration_with_other_tools.html#mega-linter-integration)
+- [scalafix](https://scalacenter.github.io/scalafix/docs/users/installation.html#plugins-for-other-build-tools)
 <!-- referring-linters-end -->
 
 ## Open-source teams

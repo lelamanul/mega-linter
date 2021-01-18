@@ -90,10 +90,13 @@ def generate_flavor(flavor, flavor_info):
                 flavor_descriptors += [descriptor["descriptor_id"]]
     # Get install instructions at linter level
     linters = megalinter.linter_factory.list_all_linters()
+    requires_docker = False
     for linter in linters:
         if match_flavor(vars(linter), flavor) is True:
             descriptor_and_linters += [vars(linter)]
             flavor_linters += [linter.name]
+            if linter.cli_docker_image is not None:
+                requires_docker = True
     # Initialize Dockerfile
     if flavor == "all":
         dockerfile = f"{REPO_HOME}/Dockerfile"
@@ -139,6 +142,9 @@ outputs:
 runs:
   using: "docker"
   image: "docker://nvuillam/mega-linter-{flavor}:{image_release}"
+  args:
+    - "-v"
+    - "/var/run/docker.sock:/var/run/docker.sock:rw"
 branding:
   icon: "check"
   color: "green"
@@ -155,6 +161,12 @@ branding:
     npm_packages = []
     pip_packages = []
     gem_packages = []
+    # Manage docker
+    if requires_docker is True:
+        apk_packages += ["docker", "openrc"]
+        docker_other += [
+            "RUN rc-update add docker boot && rc-service docker start || echo \"skipped\" && rc-service docker status"
+        ]
     for item in descriptor_and_linters:
         if "install" not in item:
             item["install"] = {}
@@ -395,9 +407,10 @@ def generate_descriptor_documentation(descriptor):
 
     # Criteria used by the descriptor to identify files to lint
     descriptor_md += ["", "## Linted files", ""]
-    if descriptor.get("active_only_if_file_found", None) is not None:
+    if len(descriptor.get("active_only_if_file_found", [])) > 0:
         descriptor_md += [
-            f"- Activated only if file is found: `{descriptor.get('active_only_if_file_found')}`"
+            f"- Activated only if at least one of these files is found:"
+            f" `{', '.join(descriptor.get('active_only_if_file_found'))}`"
         ]
     if len(descriptor.get("file_extensions", [])) > 0:
         descriptor_md += ["- File extensions:"]
@@ -640,6 +653,14 @@ def process_type(linters_by_type, type1, type_label, linters_tables_md):
         linter_doc_md += [
             f"- Visit [Official Web Site]({doc_url(linter.linter_url)}){{target=_blank}}",
         ]
+        # Docker image doc
+        if linter.cli_docker_image is not None:
+            linter_doc_md += [
+                f"- Docker image: [{linter.cli_docker_image}:{linter.cli_docker_image_version}]"
+                f"(https://hub.docker.com/r/{linter.cli_docker_image})"
+                "{target=_blank}",
+                f"  - arguments: `{' '.join(linter.cli_docker_args)}`",
+            ]
         # Rules configuration URL
         if (
             hasattr(linter, "linter_rules_configuration_url")
@@ -654,7 +675,7 @@ def process_type(linters_by_type, type1, type_label, linters_tables_md):
             config_file = f"TEMPLATES{os.path.sep}{linter.config_file_name}"
             if os.path.isfile(f"{REPO_HOME}{os.path.sep}{config_file}"):
                 linter_doc_md += [
-                    f"  - If custom {linter.config_file_name} is not found, "
+                    f"  - If custom `{linter.config_file_name}` config file is not found, "
                     f"[{linter.config_file_name}]({TEMPLATES_URL_ROOT}/{linter.config_file_name}){{target=_blank}}"
                     " will be used"
                 ]
@@ -705,11 +726,21 @@ def process_type(linters_by_type, type1, type_label, linters_tables_md):
             "| Variable | Description | Default value |",
             "| ----------------- | -------------- | -------------- |",
         ]
+        if hasattr(linter, "activation_rules"):
+            for rule in linter.activation_rules:
+                linter_doc_md += [
+                    f"| {rule['variable']} | For {linter.linter_name} to be active, {rule['variable']} must be "
+                    f"`{rule['expected_value']}` | `{rule['default_value']}` |"
+                ]
         if hasattr(linter, "variables"):
             for variable in linter.variables:
                 linter_doc_md += [
-                    f"| {variable['name']} | {variable['description']} | {variable['default_value']} |"
+                    f"| {variable['name']} | {variable['description']} | `{variable['default_value']}` |"
                 ]
+        if linter.cli_docker_image is not None:
+            linter_doc_md += [
+                f"| {linter.name}_DOCKER_IMAGE_VERSION | Docker image version | `{linter.cli_docker_image_version}` |"
+            ]
         linter_doc_md += [
             f"| {linter.name}_ARGUMENTS | User custom arguments to add in linter CLI call<br/>"
             f'Ex: `-s --foo "bar"` |  |',
@@ -788,7 +819,7 @@ def process_type(linters_by_type, type1, type_label, linters_tables_md):
 
         if linter.config_file_name is not None:
             linter_doc_md += [
-                f"| {linter.name}_FILE_NAME | {linter.linter_name} configuration file name</br>"
+                f"| {linter.name}_CONFIG_FILE | {linter.linter_name} configuration file name</br>"
                 f"Use `LINTER_DEFAULT` to let the linter find it | "
                 f"`{linter.config_file_name}` |",
                 f"| {linter.name}_RULES_PATH | Path where to find linter configuration file | "
@@ -797,9 +828,9 @@ def process_type(linters_by_type, type1, type_label, linters_tables_md):
             add_in_config_schema_file(
                 [
                     [
-                        f"{linter.name}_FILE_NAME",
+                        f"{linter.name}_CONFIG_FILE",
                         {
-                            "$id": f"#/properties/{linter.name}_FILE_NAME",
+                            "$id": f"#/properties/{linter.name}_CONFIG_FILE",
                             "type": "string",
                             "title": f"{linter.name}: Custom config file name",
                             "default": linter.config_file_name,
@@ -817,8 +848,10 @@ def process_type(linters_by_type, type1, type_label, linters_tables_md):
                     ],
                 ]
             )
+        default_disable_errors = "true" if linter.is_formatter is True else "false"
         linter_doc_md += [
-            f"| {linter.name}_DISABLE_ERRORS | Run linter but disable crash if errors found | `false` |"
+            f"| {linter.name}_DISABLE_ERRORS | Run linter but consider errors as warnings |"
+            f" `{default_disable_errors}` |"
         ]
         if linter.files_sub_directory is not None:
             linter_doc_md += [
@@ -882,26 +915,42 @@ def process_type(linters_by_type, type1, type_label, linters_tables_md):
         linter_doc_md += ["", "## Behind the scenes", ""]
         # Criteria used by the linter to identify files to lint
         linter_doc_md += ["### How are identified applicable files", ""]
-        if linter.active_only_if_file_found is not None:
+        if linter.files_sub_directory is not None:
             linter_doc_md += [
-                f"- Activated only if file is found: `{linter.active_only_if_file_found}`"
+                f"- Activated only if sub-directory `{linter.files_sub_directory}` is found."
+                f" (directory name can be overridden with `{linter.descriptor_id}_DIRECTORY`)"
+            ]
+        if len(linter.active_only_if_file_found) > 0:
+            linter_doc_md += [
+                f"- Activated only if one of these files is found:"
+                f" `{', '.join(linter.active_only_if_file_found)}`"
+            ]
+        if linter.lint_all_files is True:
+            linter_doc_md += [
+                "- If this linter is active, all files will always be linted"
+            ]
+        if linter.lint_all_other_linters_files is True:
+            linter_doc_md += [
+                "- If this linter is active, all files linted by all other active linters will be linted"
             ]
         if len(linter.file_extensions) > 0:
-            linter_doc_md += ["- File extensions:"]
-            for file_extension in linter.file_extensions:
-                linter_doc_md += [f"  - `{file_extension}`"]
-            linter_doc_md += [""]
+            linter_doc_md += [
+                f"- File extensions: `{'`, `'.join(linter.file_extensions)}`"
+            ]
         if len(linter.file_names_regex) > 0:
-            linter_doc_md += ["- File names:"]
-            for file_name in linter.file_names_regex:
-                linter_doc_md += [f"  - `{file_name}`"]
-            linter_doc_md += [""]
+            linter_doc_md += [
+                f"- File names (regex): `{'`, `'.join(linter.file_names_regex)}`"
+            ]
         if len(linter.file_contains_regex) > 0:
-            linter_doc_md += ["- Detected file content:"]
-            for file_contains_expr in linter.file_contains_regex:
-                linter_doc_md += [f"  - `{file_contains_expr}`"]
-            linter_doc_md += [""]
+            linter_doc_md += [
+                f"- Detected file content (regex): `{'`, `'.join(linter.file_contains_regex)}`"
+            ]
+        if len(linter.file_names_not_ends_with) > 0:
+            linter_doc_md += [
+                f"- File name do not ends with: `{'`, `'.join(linter.file_names_not_ends_with)}`"
+            ]
         linter_doc_md += [
+            "",
             "<!-- markdownlint-disable -->",
             "<!-- /* cSpell:disable */ -->",
         ]  # Do not check spelling of examples and logs
@@ -1380,7 +1429,7 @@ def validate_descriptors():
                     logging.error(
                         f"{os.path.basename(descriptor_file)} is not compliant with JSON schema"
                     )
-                    logging.error(f"reason: {validation_error.message}")
+                    logging.error(f"reason: {str(validation_error)}")
                     errors = errors + 1
         if errors > 0:
             raise ValueError(
@@ -1451,6 +1500,19 @@ def finalize_doc_build():
     target_file_changelog = f"{REPO_HOME}{os.path.sep}docs{os.path.sep}CHANGELOG.md"
     copy_md_file(
         f"{REPO_HOME}{os.path.sep}CHANGELOG.md", target_file_changelog,
+    )
+    # Copy CONTRIBUTING.md into /docs/contributing.md
+    target_file_contributing = (
+        f"{REPO_HOME}{os.path.sep}docs{os.path.sep}contributing.md"
+    )
+    copy_md_file(
+        f"{REPO_HOME}{os.path.sep}.github{os.path.sep}CONTRIBUTING.md",
+        target_file_contributing,
+    )
+    # Copy LICENSE into /docs/licence.md
+    target_file_license = f"{REPO_HOME}{os.path.sep}docs{os.path.sep}license.md"
+    copy_md_file(
+        f"{REPO_HOME}{os.path.sep}LICENSE", target_file_license,
     )
     # Copy mega-linter-runner/README.md into /docs/mega-linter-runner.md
     target_file_readme_runner = (
@@ -1687,8 +1749,8 @@ def generate_documentation_all_linters():
     table.title = "----Reference to Mega-Linter in linters documentation summary"
     # Output table in console
     logging.info("")
-    for table_line in table.table.splitlines():
-        logging.info(table_line)
+    # for table_line in table.table.splitlines():
+    #    logging.info(table_line)
     logging.info("")
     # Write in file
     with open(REPO_HOME + "/docs/all_linters.md", "w", encoding="utf-8") as outfile:

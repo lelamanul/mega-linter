@@ -1,4 +1,4 @@
-# MEGA-LINTER FLAVOR [ci_light]: Mega-Linter optimized for CI items (Dockerfile, Jenkinsfile, JSON/YAML schemas,XML
+# MEGA-LINTER FLAVOR [ci_light]: Optimized for CI items (Dockerfile, Jenkinsfile, JSON/YAML schemas,XML
 ###########################################
 ###########################################
 ## Dockerfile to run Mega-Linter ##
@@ -83,6 +83,7 @@ RUN npm install --no-cache --ignore-scripts \
                 dockerfilelint \
                 npm-groovy-lint \
                 jsonlint \
+                eslint eslint-plugin-jsonc \
                 v8r
 #NPM__END
 
@@ -125,7 +126,9 @@ ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
 # Installs python dependencies #
 ################################
 COPY megalinter /megalinter
-RUN python /megalinter/setup.py install
+RUN python /megalinter/setup.py install \
+    && python /megalinter/setup.py clean --all \
+    && rm -rf /var/cache/apk/*
 
 #######################################
 # Copy scripts and rules to container #
@@ -143,9 +146,9 @@ ARG BUILD_VERSION
 #################################################
 # Set ENV values used for debugging the version #
 #################################################
-ENV BUILD_DATE=$BUILD_DATE
-ENV BUILD_REVISION=$BUILD_REVISION
-ENV BUILD_VERSION=$BUILD_VERSION
+ENV BUILD_DATE=$BUILD_DATE \
+    BUILD_REVISION=$BUILD_REVISION \
+    BUILD_VERSION=$BUILD_VERSION
 
 #FLAVOR__START
 ENV MEGALINTER_FLAVOR=ci_light

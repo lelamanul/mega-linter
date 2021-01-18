@@ -110,11 +110,34 @@ module.exports = class extends Generator {
 
     return this.prompt(prompts).then(props => {
       this.props = props;
-      this.computeValues()
+      this._computeValues()
     });
   }
 
-  computeValues() {
+  writing() {
+    // Generate workflow config
+    this._generateGitHubAction();
+    this._generateJenkinsfile();
+    this._generateGitLabCi();
+    this._generateAzurePipelines();
+    if (this.props.ci === 'other') {
+      this.log("Please follow manual instructions to define CI job at https://nvuillam.github.io/mega-linter/installation/");
+      this.log("You may call `npx mega-linter-runner` to run Mega-Linter from any system (requires node.js & docker)");
+    }
+    // Generate .mega-linter.yml config
+    this._generateMegaLinterConfig();
+    // Generate .cspell.json config
+    this._generateCSpellConfig()
+    // Generate .jscpd.json config
+    this._generateJsCpdConfig()
+  }
+
+  end() {
+    this.log("You're all set !")
+    this.log("Now commit, push and create a pull request to see Mega-Linter catching errors !")
+  }
+  
+  _computeValues() {
     // Flavor
     if (this.props.flavor === 'all') {
       this.gitHubActionName = "nvuillam/mega-linter"
@@ -140,36 +163,26 @@ module.exports = class extends Generator {
     else {
       this.validateAllCodeBaseGha = `\${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }} # Validates all source when push on master, else just the git diff with master. Set 'true' if you always want to lint all sources`
     }
+    this.disable = false
     // COPY PASTES
-    if (this.props.copyPaste === true) {
+    if (this.props.copyPaste === false) {
       this.configCopyPaste = "# - COPYPASTE # Uncomment to enable checks of abusive copy-pastes"
     }
     else {
       this.configCopyPaste = "- COPYPASTE # Comment to disable checks of abusive copy-pastes"
+      this.disable = true
     }
-    // COPY PASTES
-    if (this.props.spellingMistakes === true) {
+    // Spelling mistakes
+    if (this.props.spellingMistakes === false) {
       this.configSpell = "# - SPELL # Uncomment to enable checks of spelling mistakes"
     }
     else {
       this.configSpell = "- SPELL # Comment to disable checks of spelling mistakes"
+      this.disable = true
     }
   }
 
-  writing() {
-    // Generate workflow config
-    this.generateGitHubAction();
-    this.generateJenkinsfile();
-    this.generateGitLabCi();
-    this.generateAzurePipelines();
-    if (this.props.ci === 'other') {
-      this.log("Please follow manual instructions to define CI job at https://nvuillam.github.io/mega-linter/installation/");
-    }
-    // Generate .mega-linter.yml config
-    this.generateMegaLinterConfig();
-  }
-
-  generateGitHubAction() {
+  _generateGitHubAction() {
     if (this.props.ci !== "gitHubActions") {
       return;
     }
@@ -186,40 +199,71 @@ module.exports = class extends Generator {
     );
   }
 
-  generateJenkinsfile() {
+  _generateJenkinsfile() {
     if (this.props.ci !== "jenkins") {
       return;
     }
     this.log("Jenkinsfile config generation not implemented yet, please follow manual instructions at https://nvuillam.github.io/mega-linter/installation/#jenkins")
   }
 
-  generateGitLabCi() { 
+  _generateGitLabCi() { 
     if (this.props.ci !== "gitLabCI") {
       return;
     }
-    this.log("GitLab CI config generation not implemented yet, please follow manual instructions at https://nvuillam.github.io/mega-linter/installation/#gitlab")
+    this.fs.copyTpl(
+      this.templatePath('.gitlab-ci.yml'),
+      this.destinationPath('.gitlab-ci.yml'),
+      {
+        'DEFAULT_BRANCH': this.props.defaultBranch,
+        'DOCKER_IMAGE_NAME': this.dockerImageName,
+        'DOCKER_IMAGE_VERSION': this.dockerImageVersion
+      }
+    );
   }
 
-  generateAzurePipelines() {
+  _generateAzurePipelines() {
     if (this.props.ci !== "azure") {
       return;
     }
     this.log("Azure pipelines config generation not implemented yet, please follow manual instructions at https://nvuillam.github.io/mega-linter/installation/#gitlab")
   }
 
-  generateMegaLinterConfig() {
+  _generateMegaLinterConfig() {
     this.fs.copyTpl(
       this.templatePath('.mega-linter.yml'),
       this.destinationPath('.mega-linter.yml'),
       {
         'APPLY_FIXES': this.props.applyFixes === true ? 'all' : 'none',
         'DEFAULT_BRANCH': this.props.defaultBranch,
+        'DISABLE': (this.disable === true) ? 'DISABLE:' : '# DISABLE:',
         'COPYPASTE': this.configCopyPaste,
         'SPELL': this.configSpell,
         'SHOW_ELAPSED_TIME': (this.props.elapsedTime === true) ? 'true': 'false',
-        'FILEIO_REPORTER': (this.props.fileIoReporter === true) ? 'true': 'false'
+        'FILEIO_REPORTER': (this.props.fileIoReporter === true) ? 'true': 'false',
       }
     );
+  }
+
+  _generateCSpellConfig() {
+    if (this.props.spellingMistakes !== true) {
+      return ;
+    }
+    this.fs.copyTpl(
+      this.templatePath(".cspell.json"),
+      this.destinationPath('.cspell.json'),
+      {}
+    )
+  }
+
+  _generateJsCpdConfig() {
+    if (this.props.copyPaste !== true) {
+      return ;
+    }
+    this.fs.copyTpl(
+      this.templatePath(".jscpd.json"),
+      this.destinationPath('.jscpd.json'),
+      {}
+    )
   }
 
 };

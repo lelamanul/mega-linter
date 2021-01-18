@@ -1,4 +1,4 @@
-# MEGA-LINTER FLAVOR [javascript]: Mega-Linter optimized for JAVASCRIPT or TYPESCRIPT based projects
+# MEGA-LINTER FLAVOR [javascript]: Optimized for JAVASCRIPT or TYPESCRIPT based projects
 ###########################################
 ###########################################
 ## Dockerfile to run Mega-Linter ##
@@ -91,6 +91,8 @@ RUN npm install --no-cache --ignore-scripts \
                 jscpd \
                 stylelint \
                 stylelint-config-standard \
+                stylelint-config-sass-guidelines \
+                stylelint-scss \
                 dockerfilelint \
                 editorconfig-checker \
                 graphql-schema-linter \
@@ -108,16 +110,20 @@ RUN npm install --no-cache --ignore-scripts \
                 eslint-plugin-vue \
                 babel-eslint \
                 standard@15.0.1 \
+                prettier \
                 jsonlint \
+                eslint eslint-plugin-jsonc \
                 v8r \
                 eslint-plugin-react \
                 markdownlint-cli \
+                remark-cli \
+                remark-preset-lint-recommended \
                 markdown-link-check \
+                markdown-table-formatter \
                 @stoplight/spectral@5.6.0 \
                 cspell@4.1.3 \
                 sql-lint \
                 tekton-lint \
-                prettier \
                 prettyjson \
                 @typescript-eslint/eslint-plugin \
                 @typescript-eslint/parser
@@ -199,7 +205,9 @@ ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
 # Installs python dependencies #
 ################################
 COPY megalinter /megalinter
-RUN python /megalinter/setup.py install
+RUN python /megalinter/setup.py install \
+    && python /megalinter/setup.py clean --all \
+    && rm -rf /var/cache/apk/*
 
 #######################################
 # Copy scripts and rules to container #
@@ -217,9 +225,9 @@ ARG BUILD_VERSION
 #################################################
 # Set ENV values used for debugging the version #
 #################################################
-ENV BUILD_DATE=$BUILD_DATE
-ENV BUILD_REVISION=$BUILD_REVISION
-ENV BUILD_VERSION=$BUILD_VERSION
+ENV BUILD_DATE=$BUILD_DATE \
+    BUILD_REVISION=$BUILD_REVISION \
+    BUILD_VERSION=$BUILD_VERSION
 
 #FLAVOR__START
 ENV MEGALINTER_FLAVOR=javascript
